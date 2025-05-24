@@ -1,9 +1,17 @@
 <!DOCTYPE html>
 <html lang="sv">
 <head>
-  <meta charset="UTF-8" />
+ <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Inköpslistan">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon-192.png">
+
+  <!-- Firebase (compat SDK) -->
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore-compat.js"></script>
   <title>Inköpstavla</title>
   <style>
     body {
@@ -33,10 +41,6 @@
   		display: none;
 	}
   </style>
-<!-- Firebase SDK -->
-  <!-- Firebase SDK -->
-<script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js"></script>
 
 <script>
 	let db;
@@ -263,29 +267,29 @@ if ('serviceWorker' in navigator) {
         .catch(() => alert("Kunde inte läsa från urklipp."));
     }
     
-    	function saveToFirebase() {
-  alert("saving");
-  db.collection("inkop").add({
-    col1: col1.selected,
-    col2: col2.selected,
-    tid: Date.now()
-  }).then(() => alert("Sparat i databasen!"))
-    .catch(err => alert("Fel vid sparning: " + err.message));
-}
-
-function loadFromFirebase() {
-  db.collection("inkop").orderBy("tid", "desc").limit(1).get().then(snapshot => {
-    if (!snapshot.empty) {
-      const data = snapshot.docs[0].data();
-      col1.selected = data.col1;
-      col2.selected = data.col2;
-      draw();
-      alert("Inställningar laddade!");
-    } else {
-      alert("Inga sparade data hittades.");
-    }
-  });
-}
+    function saveToFirebase() {
+	  alert("saving");
+	  db.collection("inkop").add({
+		col1: col1.selected,
+		col2: col2.selected,
+		tid: Date.now()
+	  }).then(() => alert("Sparat i databasen!"))
+		.catch(err => alert("Fel vid sparning: " + err.message));
+	}
+	
+	function loadFromFirebase() {
+	  db.collection("inkop").orderBy("tid", "desc").limit(1).get().then(snapshot => {
+		if (!snapshot.empty) {
+		  const data = snapshot.docs[0].data();
+		  col1.selected = data.col1;
+		  col2.selected = data.col2;
+		  draw();
+		  alert("Inställningar laddade!");
+		} else {
+		  alert("Inga sparade data hittades.");
+		}
+	  });
+	}
 
   </script>
   </body>
