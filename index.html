@@ -39,6 +39,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js"></script>
 
 <script>
+	let db;
   const ACCESS_PASSWORD = "hemligt"; // Ändra detta!
   let unlocked = false;
 
@@ -64,7 +65,7 @@
     };
 
     firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
+    db = firebase.firestore();
 
     // Exempel på hur du kan spara col1 och col2
     window.saveToFirebase = function () {
