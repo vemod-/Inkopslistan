@@ -104,6 +104,7 @@ if ('serviceWorker' in navigator) {
   });
 }
 <body>
+<div id="app">
   <h2 style="color:white"></h2>
   <canvas id="canvas"></canvas>
 
@@ -114,6 +115,7 @@ if ('serviceWorker' in navigator) {
     <button onclick="pasteSettingsFromClipboard()">Klistra in</button>
     <button onclick="saveToFirebase()">Spara till databas</button>
 <button onclick="loadFromFirebase()">Ladda från databas</button>
+  </div>
   </div>
   <script>
     const canvas = document.getElementById("canvas");
