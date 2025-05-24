@@ -69,6 +69,7 @@
 
     // Exempel på hur du kan spara col1 och col2
     window.saveToFirebase = function () {
+    	alert("saving");
       db.collection("inkop").add({
         col1: col1.selected,
         col2: col2.selected,
