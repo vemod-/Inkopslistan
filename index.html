@@ -32,72 +32,66 @@
   </style>
   </script>
 <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js"></script>
-  <script>
-    // 🔐 Enkel lösenordsskydd
-    const ACCESS_PASSWORD = "hemligt"; // Ändra detta!
-    let unlocked = false;
+  <!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js"></script>
 
-    function checkPassword() {
-      const input = prompt("Ange lösenord:");
-      if (input === ACCESS_PASSWORD) {
-        unlocked = true;
-        document.getElementById("app").style.display = "block";
-        initFirebase();
-      } else {
-        alert("Fel lösenord.");
-      }
+<script>
+  const ACCESS_PASSWORD = "hemligt"; // Ändra detta!
+  let unlocked = false;
+
+  function checkPassword() {
+    const input = prompt("Ange lösenord:");
+    if (input === ACCESS_PASSWORD) {
+      unlocked = true;
+      document.getElementById("app").style.display = "block";
+      initFirebase();
+    } else {
+      alert("Fel lösenord.");
+    }
+  }
+
+  function initFirebase() {
+    const firebaseConfig = {
+      apiKey: "AIzaSyAg88pKl_8o7fL3pDz9yRPiHhH6HhtNVX0",
+      authDomain: "inkopslistan-6e2b6.firebaseapp.com",
+      projectId: "inkopslistan-6e2b6",
+      storageBucket: "inkopslistan-6e2b6.appspot.com",
+      messagingSenderId: "223179773895",
+      appId: "1:223179773895:web:14ec4f7ed401c3540babe2"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    // Exempel på hur du kan spara col1 och col2
+    window.saveToFirebase = function () {
+      db.collection("inkop").add({
+        col1: col1.selected,
+        col2: col2.selected,
+        tid: Date.now()
+      }).then(() => alert("Sparat i databasen!"))
+        .catch(err => alert("Fel vid sparning: " + err.message));
     }
 
-    // 🔥 Firebase initiering
-    // Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
-
-// Your web app's Firebase configuration
-const firebaseConfig = {
-  apiKey: "AIzaSyAg88pKl_8o7fL3pDz9yRPiHhH6HhtNVX0",
-  authDomain: "inkopslistan-6e2b6.firebaseapp.com",
-  projectId: "inkopslistan-6e2b6",
-  storageBucket: "inkopslistan-6e2b6.firebasestorage.app",
-  messagingSenderId: "223179773895",
-  appId: "1:223179773895:web:14ec4f7ed401c3540babe2"
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-
-      // 🚀 Lägg till vara
-      window.addItem = function () {
-        const input = document.getElementById("itemInput");
-        const value = input.value.trim();
-        if (!value) return;
-
-        db.collection("inkop").add({
-          namn: value,
-          tid: Date.now()
-        }).then(() => {
-          input.value = "";
-        });
-      }
-
-      // 🔁 Hämta lista i realtid
-      db.collection("inkop").orderBy("tid", "desc").onSnapshot(snapshot => {
-        const list = document.getElementById("itemList");
-        list.innerHTML = "";
-        snapshot.forEach(doc => {
-          const li = document.createElement("li");
-          li.textContent = doc.data().namn;
-          list.appendChild(li);
-        });
+    // Exempel på hur du kan läsa senaste posten
+    window.loadFromFirebase = function () {
+      db.collection("inkop").orderBy("tid", "desc").limit(1).get().then(snapshot => {
+        if (!snapshot.empty) {
+          const data = snapshot.docs[0].data();
+          col1.selected = data.col1;
+          col2.selected = data.col2;
+          draw();
+          alert("Inställningar laddade!");
+        } else {
+          alert("Inga sparade data hittades.");
+        }
       });
     }
+  }
 
-    window.onload = checkPassword;
-  </script>
-
+  window.onload = checkPassword;
+</script>
 </head>
 <link rel="manifest" href="manifest.json">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -118,6 +112,8 @@ if ('serviceWorker' in navigator) {
     <input type="file" onchange="importSettingsFromFile(this.files[0])" />
     <button onclick="copySettingsToClipboard()">Kopiera</button>
     <button onclick="pasteSettingsFromClipboard()">Klistra in</button>
+    <button onclick="saveToFirebase()">Spara till databas</button>
+<button onclick="loadFromFirebase()">Ladda från databas</button>
   </div>
   <script>
     const canvas = document.getElementById("canvas");
