@@ -41,29 +41,6 @@
 <script>
 	let db;
 	
-	function saveToFirebase() {
-  alert("saving");
-  db.collection("inkop").add({
-    col1: col1.selected,
-    col2: col2.selected,
-    tid: Date.now()
-  }).then(() => alert("Sparat i databasen!"))
-    .catch(err => alert("Fel vid sparning: " + err.message));
-}
-
-function loadFromFirebase() {
-  db.collection("inkop").orderBy("tid", "desc").limit(1).get().then(snapshot => {
-    if (!snapshot.empty) {
-      const data = snapshot.docs[0].data();
-      col1.selected = data.col1;
-      col2.selected = data.col2;
-      draw();
-      alert("Inställningar laddade!");
-    } else {
-      alert("Inga sparade data hittades.");
-    }
-  });
-}
   const ACCESS_PASSWORD = "hemligt"; // Ändra detta!
   let unlocked = false;
 
@@ -285,6 +262,31 @@ if ('serviceWorker' in navigator) {
         })
         .catch(() => alert("Kunde inte läsa från urklipp."));
     }
+    
+    	function saveToFirebase() {
+  alert("saving");
+  db.collection("inkop").add({
+    col1: col1.selected,
+    col2: col2.selected,
+    tid: Date.now()
+  }).then(() => alert("Sparat i databasen!"))
+    .catch(err => alert("Fel vid sparning: " + err.message));
+}
+
+function loadFromFirebase() {
+  db.collection("inkop").orderBy("tid", "desc").limit(1).get().then(snapshot => {
+    if (!snapshot.empty) {
+      const data = snapshot.docs[0].data();
+      col1.selected = data.col1;
+      col2.selected = data.col2;
+      draw();
+      alert("Inställningar laddade!");
+    } else {
+      alert("Inga sparade data hittades.");
+    }
+  });
+}
+
   </script>
   </body>
 </html>
