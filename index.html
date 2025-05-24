@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <title>Inköpstavla</title>
+  <style>
+    body {
+      margin: 0;
+      background: #222;
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    canvas {
+      background: #000;
+      margin-top: 10px;
+      touch-action: manipulation;
+    }
+    .controls {
+      margin-top: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    button, input[type="file"] {
+      padding: 6px 12px;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <h2 style="color:white"></h2>
+  <canvas id="canvas"></canvas>
+
+  <div class="controls">
+    <button onclick="exportSettings()">Exportera</button>
+    <input type="file" onchange="importSettingsFromFile(this.files[0])" />
+    <button onclick="copySettingsToClipboard()">Kopiera</button>
+    <button onclick="pasteSettingsFromClipboard()">Klistra in</button>
+  </div>
+
+  <script>
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+
+    const COL_SIZE = 25;
+    let selected1 = new Array(COL_SIZE).fill(false);
+    let selected2 = new Array(COL_SIZE).fill(false);
+
+    const beforeImg = new Image();
+    const afterImg = new Image();
+    beforeImg.src = "before.jpg";
+    afterImg.src = "after.jpg";
+
+    const col1 = {
+      xOffset: 85,
+      width: 249,
+      yOffset: 453,
+      height: 52.75,
+      skew: 1,
+      selected: selected1
+    };
+
+    const col2 = {
+      xOffset: 777,
+      width: 349,
+      yOffset: 452,
+      height: 53.07,
+      skew: 9,
+      selected: selected2
+    };
+
+    function getRect(col, i) {
+      return {
+        x: col.xOffset + (col.skew * (i / COL_SIZE)),
+        y: col.yOffset + (i * col.height),
+        width: col.width,
+        height: col.height
+      };
+    }
+
+    function resizeCanvasToImageAspect() {
+      const aspect = beforeImg.width / beforeImg.height;
+      const windowAspect = window.innerWidth / window.innerHeight;
+
+      if (windowAspect > aspect) {
+        canvas.height = window.innerHeight * 0.9;
+        canvas.width = canvas.height * aspect;
+      } else {
+        canvas.width = window.innerWidth * 0.95;
+        canvas.height = canvas.width / aspect;
+      }
+
+      canvas.style.position = 'relative';
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(beforeImg, 0, 0, canvas.width, canvas.height);
+
+      const scaleX = canvas.width / beforeImg.width;
+      const scaleY = canvas.height / beforeImg.height;
+
+      for (let i = 0; i < COL_SIZE; i++) {
+        [col1, col2].forEach(col => {
+          if (col.selected[i]) {
+            const r = getRect(col, i);
+            ctx.drawImage(
+              afterImg,
+              r.x, r.y, r.width, r.height,
+              r.x * scaleX, r.y * scaleY, r.width * scaleX, r.height * scaleY
+            );
+          }
+        });
+      }
+    }
+
+    canvas.addEventListener("click", (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const x = (e.clientX - rect.left) * (beforeImg.width / canvas.width);
+      const y = (e.clientY - rect.top) * (beforeImg.height / canvas.height);
+
+      [col1, col2].forEach(col => {
+        for (let i = 0; i < COL_SIZE; i++) {
+          const r = getRect(col, i);
+          if (x >= r.x && x <= r.x + r.width && y >= r.y && y <= r.y + r.height) {
+            col.selected[i] = !col.selected[i];
+            draw();
+            return;
+          }
+        }
+      });
+    });
+
+    window.addEventListener("resize", () => {
+      resizeCanvasToImageAspect();
+      draw();
+    });
+
+    let imagesLoaded = 0;
+    [beforeImg, afterImg].forEach(img => {
+      img.onload = () => {
+        imagesLoaded++;
+        if (imagesLoaded === 2) {
+          resizeCanvasToImageAspect();
+          draw();
+        }
+      };
+    });
+
+    function exportSettings() {
+      const settings = {
+        col1: col1.selected,
+        col2: col2.selected
+      };
+      const blob = new Blob([JSON.stringify(settings)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'inställningar.json';
+      a.click();
+    }
+
+    function importSettingsFromFile(file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const settings = JSON.parse(reader.result);
+          col1.selected = settings.col1;
+          col2.selected = settings.col2;
+          draw();
+          alert("Inställningar laddade!");
+        } catch (e) {
+          alert("Ogiltig fil.");
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function copySettingsToClipboard() {
+      const settings = {
+        col1: col1.selected,
+        col2: col2.selected
+      };
+      const encoded = btoa(JSON.stringify(settings));
+      navigator.clipboard.writeText(encoded)
+        .then(() => alert("Kopierat till urklipp!"))
+        .catch(() => alert("Kunde inte kopiera"));
+    }
+
+    function pasteSettingsFromClipboard() {
+      navigator.clipboard.readText()
+        .then(text => {
+          try {
+            const json = atob(text);
+            const settings = JSON.parse(json);
+            col1.selected = settings.col1;
+            col2.selected = settings.col2;
+            draw();
+            alert("Inställningar laddade!");
+          } catch (e) {
+            alert("Felaktigt innehåll i urklipp.");
+          }
+        })
+        .catch(() => alert("Kunde inte läsa från urklipp."));
+    }
+  </script>
+</body>
+</html>
