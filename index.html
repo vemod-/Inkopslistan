@@ -45,17 +45,7 @@ if ('serviceWorker' in navigator) {
 <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js"></script>
-<body>
-  <h2 style="color:white"></h2>
-  <canvas id="canvas"></canvas>
-
-  <div class="controls">
-    <button onclick="exportSettings()">Exportera</button>
-    <input type="file" onchange="importSettingsFromFile(this.files[0])" />
-    <button onclick="copySettingsToClipboard()">Kopiera</button>
-    <button onclick="pasteSettingsFromClipboard()">Klistra in</button>
-  </div>
-<script>
+  <script>
     // 🔐 Enkel lösenordsskydd
     const ACCESS_PASSWORD = "hemligt"; // Ändra detta!
     let unlocked = false;
@@ -118,8 +108,16 @@ const app = initializeApp(firebaseConfig);
 
     window.onload = checkPassword;
   </script>
-  
+<body>
+  <h2 style="color:white"></h2>
+  <canvas id="canvas"></canvas>
 
+  <div class="controls">
+    <button onclick="exportSettings()">Exportera</button>
+    <input type="file" onchange="importSettingsFromFile(this.files[0])" />
+    <button onclick="copySettingsToClipboard()">Kopiera</button>
+    <button onclick="pasteSettingsFromClipboard()">Klistra in</button>
+  </div>
   <script>
     const canvas = document.getElementById("canvas");
     const ctx = canvas.getContext("2d");
