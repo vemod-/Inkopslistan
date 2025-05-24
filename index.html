@@ -46,27 +46,23 @@
 	let db;
 
  function saveToFirebase() {
-	  db.collection("inkop").add({
-		col1: col1.selected,
-		col2: col2.selected,
-		tid: Date.now()
-	  }).then(() => alert("Sparat i databasen!"))
-		.catch(err => alert("Fel vid sparning: " + err.message));
-	}
-	
-	function loadFromFirebase() {
-	  db.collection("inkop").orderBy("tid", "desc").limit(1).get().then(snapshot => {
-		if (!snapshot.empty) {
-		  const data = snapshot.docs[0].data();
-		  col1.selected = data.col1;
-		  col2.selected = data.col2;
-		  draw();
-		  alert("Inställningar laddade!");
-		} else {
-		  alert("Inga sparade data hittades.");
-		}
-	  });
-	}
+  db.collection("inkop").add({
+    col1: col1.selected,
+    col2: col2.selected,
+    tid: Date.now()
+  }).catch(err => console.error("Fel vid sparning:", err));
+}
+
+function loadFromFirebase() {
+  db.collection("inkop").orderBy("tid", "desc").limit(1).get().then(snapshot => {
+    if (!snapshot.empty) {
+      const data = snapshot.docs[0].data();
+      col1.selected = data.col1;
+      col2.selected = data.col2;
+      draw();
+    }
+  }).catch(err => console.error("Fel vid laddning:", err));
+}
 
   const ACCESS_PASSWORD = "hemligt"; // Ändra detta!
   let unlocked = false;
@@ -122,7 +118,7 @@ if ('serviceWorker' in navigator) {
     <input type="file" onchange="importSettingsFromFile(this.files[0])" />
     <button onclick="copySettingsToClipboard()">Kopiera</button>
     <button onclick="pasteSettingsFromClipboard()">Klistra in</button>-->
-    <button onclick="saveToFirebase()">Spara till databas</button>
+    <!--><button onclick="saveToFirebase()">Spara till databas</button>-->
     <!--<button onclick="loadFromFirebase()">Ladda från databas</button>-->
   </div>
 </div>
@@ -213,6 +209,7 @@ if ('serviceWorker' in navigator) {
           if (x >= r.x && x <= r.x + r.width && y >= r.y && y <= r.y + r.height) {
             col.selected[i] = !col.selected[i];
             draw();
+            saveToFirebase();
             return;
           }
         }
