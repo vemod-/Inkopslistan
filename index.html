@@ -24,7 +24,8 @@
     }
     canvas {
       background: #000;
-      margin-top: 10px;
+      /*margin-top: 10px;*/
+      margin: auto;
       touch-action: manipulation;
     }
     .controls {
@@ -169,7 +170,7 @@ if ('serviceWorker' in navigator) {
       const windowAspect = window.innerWidth / window.innerHeight;
 
       if (windowAspect > aspect) {
-        canvas.height = window.innerHeight * 0.9;
+        canvas.height = window.innerHeight * 0.95;
         canvas.width = canvas.height * aspect;
       } else {
         canvas.width = window.innerWidth * 0.95;
