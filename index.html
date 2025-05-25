@@ -74,15 +74,24 @@ function loadFromFirebase() {
   let unlocked = false;
 
   function checkPassword() {
-	  const input = prompt("Ange lösenord:");
+	  let input = prompt("Ange lösenord:");
 	  if (!input) return;
-	
-	  // Tillfälligt initiera Firebase för kontroll
+	  
+	  	  // Tillfälligt initiera Firebase för kontroll
+	  if (input === "adduser") {
+	  	const userName = prompt("Ange lösenord:");
+	    if (!userName) return;
+	    if (!firebase.apps.length) {
+			initFirebase(); // Skapa bara om inte redan initierat
+			firebase.firestore().collection("users").doc(userName).set({ active: true });
+			input = userName;
+	  	}
+	  }
 	  if (!firebase.apps.length) {
 		initFirebase(); // Skapa bara om inte redan initierat
 		firebase.firestore().collection("users").doc(ACCESS_PASSWORD).set({ active: true });
 	  }
-	
+		
 	  const tmpDb = firebase.firestore();
 	  tmpDb.collection("users").doc(input).get().then(doc => {
 		if (doc.exists) {
