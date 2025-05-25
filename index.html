@@ -44,9 +44,10 @@
 
 <script>
 	let db;
+	let userId;
 
  function saveToFirebase() {
-  db.collection("inkop").add({
+  db.collection(userId).add({
     col1: col1.selected,
     col2: col2.selected,
     tid: Date.now()
@@ -54,7 +55,7 @@
 }
 
 function loadFromFirebase() {
-  db.collection("inkop").orderBy("tid", "desc").limit(1).get().then(snapshot => {
+  db.collection(userId).orderBy("tid", "desc").limit(1).get().then(snapshot => {
     if (!snapshot.empty) {
       const data = snapshot.docs[0].data();
       col1.selected = data.col1;
@@ -70,6 +71,7 @@ function loadFromFirebase() {
   function checkPassword() {
     const input = prompt("Ange lösenord:");
     if (input === ACCESS_PASSWORD) {
+      userId = input;	
       unlocked = true;
       document.getElementById("app").style.display = "block";
       initFirebase();
