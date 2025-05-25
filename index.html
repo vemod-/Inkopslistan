@@ -70,17 +70,29 @@ function loadFromFirebase() {
   let unlocked = false;
 
   function checkPassword() {
-    const input = prompt("Ange lösenord:");
-    if (input === ACCESS_PASSWORD) {
-      userId = input;	
-      unlocked = true;
-      document.getElementById("app").style.display = "block";
-      initFirebase();
-      loadFromFirebase();
-    } else {
-      alert("Fel lösenord.");
-    }
-  }
+	  const input = prompt("Ange lösenord:");
+	  if (!input) return;
+	
+	  // Tillfälligt initiera Firebase för kontroll
+	  if (!firebase.apps.length) {
+		initFirebase(); // Skapa bara om inte redan initierat
+		firebase.firestore().collection("users").doc(ACCESS_PASSWORD).set({ active: true });
+	  }
+	
+	  const tmpDb = firebase.firestore();
+	  tmpDb.collection("users").doc(input).get().then(doc => {
+		if (doc.exists) {
+		  userId = input;
+		  unlocked = true;
+		  document.getElementById("app").style.display = "block";
+		  loadFromFirebase();
+		} else {
+		  alert("Fel lösenord.");
+		}
+	  }).catch(err => {
+		console.error("Fel vid lösenordskoll:", err);
+	  });
+	}
 
   function initFirebase() {
     const firebaseConfig = {
@@ -92,8 +104,10 @@ function loadFromFirebase() {
       appId: "1:223179773895:web:14ec4f7ed401c3540babe2"
     };
 
-    firebase.initializeApp(firebaseConfig);
-    db = firebase.firestore();
+    if (!firebase.apps.length) {
+		firebase.initializeApp(firebaseConfig);
+	  }
+	  db = firebase.firestore();
 
   }
 
